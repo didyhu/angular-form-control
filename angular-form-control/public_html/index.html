@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="description" content="angular-form-control">
+        <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+        <script src="bower_components/jquery/dist/jquery.min.js" type="text/javascript"></script>
+        <script src="bower_components/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="bower_components/moment/min/moment-with-locales.min.js" type="text/javascript"></script>
+        <script src="bower_components/moment/locale/zh-cn.js" type="text/javascript"></script>
+        <script src="bower_components/angular/angular.min.js" type="text/javascript"></script>
+        <script src="bower_components/angular-sanitize/angular-sanitize.min.js" type="text/javascript"></script>
+        <script src="bower_components/ngDraggable/ngDraggable.js" type="text/javascript"></script>
+        <script src="app.js"></script>
+        <title>angular-form-control</title>
+        <style>
+            [my-search]{position:relative;}
+            [my-search] ul{position:absolute;display:block!important;}
+            [my-article] [contenteditable]{min-height:200px;height:auto}
+            [my-article] .btn-group{margin-bottom:10px;}
+            .album ul{position:relative}
+            .album li{position:relative;width:150px;height:150px;margin:10px;overflow:hidden}
+            .album li img{position:absolute;left:50%;top:50%;min-width:150px;min-height:150px;max-width:150%;max-height:150%;transform: translate(-50%,-50%)}
+            .album li button{position:absolute;left:0;top:0;display:none}
+            .album li:hover button{display:block}
+
+            my-tree-view{margin-left:10px;display:block;}
+            my-checkbox label{margin-right:1em;}
+        </style>
+    </head>
+    <body ng-app="app">
+        <div ng-controller="SampleController" class="container">
+            <div class="form">
+                <div class="form-group">
+                    <label>Text</label>
+                    <input ng-model="form.text" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Textarea</label>
+                    <textarea ng-model="form.textarea" class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Number</label>
+                    <input type="number" ng-model="form.number" min="10" max="20" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" ng-model="form.date" min="10" max="20" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Datetime</label>
+                    <input type="datetime-local" ng-model="form.datetime" min="10" max="20" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Checkbox</label>
+                    <div>
+                        <my-checkbox ng-model="form.checkbox">A</my-checkbox>
+                        <br/>
+                        <label><input ng-model="form.checkbox" type="checkbox"> A</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Radio</label>
+                    <div>
+                        <my-radio ng-model="form.radio" value='a'>A</my-radio>
+                        <my-radio ng-model="form.radio" value='b'>B</my-radio>
+                        <br/>
+                        <label><input type="radio" name="radio" ng-model="form.radio" value="a"> A</label>
+                        <label><input type="radio" name="radio" ng-model="form.radio" value="b"> B</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Checklist</label>
+                    <div>
+                        <my-checkbox ng-repeat="(key,value) in form.checklist" ng-model="form.checklist[key]">{{key}}</my-checkbox>
+                        <br/>
+                        <label ng-repeat="(key,value) in form.checklist"><input type="checkbox" ng-model="form.checklist[key]"> {{key}}</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Select</label>
+                    <div>
+                        <select ng-model="form.selectone" class="form-control">
+                            <option value="a">A</option>
+                            <option value="b">B</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Image</label>
+                    <div>
+                        <img ng-show="form.image" ng-src="{{form.image}}" class="img-responsive">
+                        <div>
+                            <label class="btn btn-default">
+                                上传图片
+                                <div ng-model="form.image" my-image onupload="onUploadImage(file)" style="display:none"></div>
+                            </label>
+                            <button class="btn btn-danger" ng-show="form.image" ng-click="form.image = null">删除图片</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Album</label>
+                    <div class="album">
+                        <div ng-show="form.album.length" class="help-block">左右拖动排序图片</div>
+                        <ul class="list-inline">
+                            <li ng-repeat="photo in form.album track by $index">
+                                <img ng-src="{{photo}}" my-drag on-drag-end="onDragPhoto(photo,form.album,event)">
+                                <button class="btn btn-danger" ng-click="form.album.splice(form.album.indexOf(photo), 1)">删除文件</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <label class="btn btn-default">
+                            增加图片
+                            <div ng-model="form.album" my-add-to-album onupload="onUploadImage(file)" style="display:none"></div>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>File</label>
+                    <div>
+                        <span>{{form.file}}</span>
+                        <div>
+                            <label class="btn btn-default">
+                                上传文件
+                                <div ng-model="form.file" my-file onupload="onUploadFile(file)" style="display:none"></div>
+                            </label>
+                            <button class="btn btn-danger" ng-show="form.file" ng-click="form.file = null">删除文件</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Search</label>
+                    <div class="input-group" ng-show='!edit_search'>
+                        <input class="form-control" ng-model='form.search' readonly="true" disabled="true"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click='edit_search = true'>选择</button>
+                        </span>
+                    </div>
+                    <div class="input-group" ng-show='edit_search'>
+                        <div class="clearfix" ng-model="form.search" my-search onsearch="onSearch(query)" onselect="select(item);edit_search = false"></div>   
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" ng-click='edit_search = false'>取消</button>
+                        </span>
+                    </div>
+                    <div class="help-block" ng-show='edit_search'>输入关键词，在结果中选择</div>
+                </div>
+                <div class="form-group">
+                    <label>Article</label>                    
+                    <div ng-model="form.article" my-article onupload="onUploadImage(file)"></div>
+                </div>
+                <div class="form-group">
+                    <label>TreeView</label>                    
+                    <my-tree-view ng-show="true" on-click="onClickTreeNode($event,node)" node="form.tree"></my-tree-view>
+                </div>
+            </div>
+            <pre>{{ form | json }}</pre>
+        </div>
+    </body>
+</html>
