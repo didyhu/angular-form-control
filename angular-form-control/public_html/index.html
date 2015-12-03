@@ -20,11 +20,13 @@
             [my-article] .btn-group{margin-bottom:10px;}
             .album ul{position:relative}
             .album li{position:relative;width:150px;height:150px;margin:10px;overflow:hidden}
-            .album li img{position:absolute;left:50%;top:50%;min-width:150px;min-height:150px;max-width:150%;max-height:150%;transform: translate(-50%,-50%)}
-            .album li button{position:absolute;left:0;top:0;display:none}
+            .album li img{position:absolute;left:50%;top:50%;min-width:150px;min-height:150px;max-width:300px;max-height:300px;transform: translate(-50%,-50%);cursor: -webkit-grab;}
+            .album li button{position:absolute;left:0;top:0;display:none;cursor:pointer}
             .album li:hover button{display:block}
 
             my-tree-view{margin-left:10px;display:block;}
+            my-tree-view i{width:1.2em;display:inline-block;text-align: center;}
+            
             my-checkbox label{margin-right:1em;}
         </style>
     </head>
@@ -105,7 +107,7 @@
                         <div ng-show="form.album.length" class="help-block">左右拖动排序图片</div>
                         <ul class="list-inline">
                             <li ng-repeat="photo in form.album track by $index">
-                                <img ng-src="{{photo}}" my-drag on-drag-end="onDragPhoto(photo,form.album,event)">
+                                <img draggable="true" ng-src="{{photo}}" my-drag on-drag-end="onDragPhoto(photo,form.album,event)">
                                 <button class="btn btn-danger" ng-click="form.album.splice(form.album.indexOf(photo), 1)">删除文件</button>
                             </li>
                         </ul>
@@ -149,10 +151,12 @@
                 <div class="form-group">
                     <label>Article</label>                    
                     <div ng-model="form.article" my-article onupload="onUploadImage(file)"></div>
+                    <label>预览</label>
+                    <div class='article' ng-bind-html="form.article"></div>
                 </div>
                 <div class="form-group">
                     <label>TreeView</label>                    
-                    <my-tree-view ng-show="true" on-click="onClickTreeNode($event,node)" node="form.tree"></my-tree-view>
+                    <my-tree-view ng-show="true" on-click="onClickTreeNode($event,node)" node="form.tree" show-children='true' hide-self='true'></my-tree-view>
                 </div>
             </div>
             <pre>{{ form | json }}</pre>

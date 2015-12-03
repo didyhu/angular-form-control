@@ -165,7 +165,7 @@
                                     })
                         });
                         $ngModel.$render = function () {
-                            $editor.html($sanitize($ngModel.viewValue));
+                            $editor.html($ngModel.viewValue);
                         }
                         $editor.on("drop", function (event) {
                             if (event.originalEvent.dataTransfer.files[0] && event.originalEvent.dataTransfer.files[0].type.match("image.*")) {
@@ -218,15 +218,36 @@
             })
             .directive("myTreeView", function ($compile) {
                 return {
-                    template: "<i class='fa fa-caret-right'></i><span class='btn btn-link text-muted'>{{node.name}}</span>",
-                    scope: {"node": "=", "onClick": "&"},
+                    template: "<i ng-hide='hideSelf' class='fa' ng-class='css'></i><span ng-hide='hideSelf' class='btn btn-link text-muted'>{{node.name}}</span>",
+                    scope: {"node": "=", "onClick": "&", 'showChildren': "=", 'hideSelf': "@"},
                     link: function ($scope, $element, $attrs) {
-                        $element.on("click", function (event) {
+
+
+                        console.log($scope.showChildren)
+                        $element.on("click", "span", function (event) {
                             return $scope.onClick({$event: event, node: $scope.node})
                         })
+
+                        $element.on("click", "i", function (event) {
+                            if ($scope.node.children) {
+                                $scope.$apply(function () {
+                                    $scope.showChildren = !$scope.showChildren;
+                                    $scope.css = !$scope.showChildren ? "fa-plus-square" : "fa-minus-square";
+                                })
+                            }
+                            return false;
+                        })
+
                         if ($scope.node.children) {
-                            $element.append("<my-tree-view ng-repeat='child in node.children' node='child' on-click='onClick({$event:$event,node:node})'/>")
+
+                            $scope.css = !$scope.showChildren ? "fa-plus-square" : "fa-minus-square";
+
+                            var el = $("<div ng-show='showChildren'></div>")
+                            el.append("<my-tree-view ng-repeat='child in node.children' node='child' on-click='onClick({$event:$event,node:node})'></my-tree-view>")
+                            $element.append(el);
                             $compile($element.contents())($scope);
+                        } else {
+                            $scope.css = "fa-caret-right";
                         }
                     }
                 }
@@ -250,7 +271,11 @@
                         {name: "level_1"},
                         {name: "level_2", children: [
                                 {name: "level_2_1"},
-                                {name: "level_2_2"}
+                                {name: "level_2_2", children: [
+                                        {name: "level_2_2_1"},
+                                        {name: "level_2_2_2"},
+                                        {name: "level_2_2_3"}
+                                    ]}
                             ]},
                         {name: "level_3", children: [
                                 {name: "level_3_1"},
